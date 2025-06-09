@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chromebook System Check</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .status-pending { background-color: #e5e7eb; color: #4b5563; }
+        .status-success { background-color: #d1fae5; color: #065f46; }
+        .status-error { background-color: #fee2e2; color: #991b1b; }
+        .status-inprogress { background-color: #fef3c7; color: #92400e; }
+        #mic-visualizer {
+            width: 100%;
+            height: 50px;
+            background-color: #f3f4f6;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative;
+        }
+        #mic-level {
+            height: 100%;
+            width: 0%;
+            background-color: #34d399;
+            transition: width 0.05s linear;
+        }
+        .icon {
+            width: 2rem;
+            height: 2rem;
+            stroke-width: 1.5;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-4xl bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 md:p-8">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Chromebook System Check</h1>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        
+        <p class="mb-8 text-gray-600 dark:text-gray-400">
+            Run these diagnostic tests to check the hardware and software functionality of this device. This is ideal for a pre-check in a kiosk environment.
+        </p>
+
+        <!-- Test Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Camera Test -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-5 flex flex-col">
+                <div class="flex items-center mb-3">
+                    <svg class="icon text-purple-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9.5A2.5 2.5 0 0 1 5.5 7h13A2.5 2.5 0 0 1 21 9.5V17a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17V9.5Z" /><path stroke-linecap="round" stroke-linejoin="round" d="m7 12 4.002 4.002a1 1 0 0 0 1.414 0L17 12" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2" /></svg>
+                    <h3 class="text-lg font-semibold">Camera</h3>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 flex-grow">Checks if the webcam is accessible and can display a video stream.</p>
+                <div id="camera-result" class="mt-4 hidden text-sm">
+                    <video id="camera-feed" class="w-full rounded-lg" autoplay playsinline></video>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                    <span id="camera-status" class="status-badge status-pending">Pending</span>
+                    <button id="camera-btn" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 text-sm font-medium">Start Test</button>
+                </div>
+            </div>
+            
+            <!-- Microphone Test -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-5 flex flex-col">
+                 <div class="flex items-center mb-3">
+                    <svg class="icon text-green-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 0 1-14 0v-2" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 19v3" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 22h8" /></svg>
+                    <h3 class="text-lg font-semibold">Microphone</h3>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 flex-grow">Listens for input and visualizes the sound level.</p>
+                 <div id="mic-result" class="mt-4 hidden">
+                     <p class="text-sm text-center mb-2">Speak into the microphone...</p>
+                     <div id="mic-visualizer"><div id="mic-level"></div></div>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                    <span id="mic-status" class="status-badge status-pending">Pending</span>
+                    <button id="mic-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm font-medium">Start Test</button>
+                </div>
+            </div>
+
+            <!-- Speaker Test -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-5 flex flex-col">
+                 <div class="flex items-center mb-3">
+                    <svg class="icon text-red-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5 5 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" /></svg>
+                    <h3 class="text-lg font-semibold">Speakers</h3>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 flex-grow">Plays a short tone. Confirm if you can hear it.</p>
+                 <div id="speaker-result" class="mt-4 text-sm hidden">
+                     <p class="mb-3 text-center">Did you hear a tone?</p>
+                     <div class="flex justify-center gap-3">
+                         <button id="speaker-yes" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium">Yes</button>
+                         <button id="speaker-no" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 text-sm font-medium">No</button>
+                     </div>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                    <span id="speaker-status" class="status-badge status-pending">Pending</span>
+                    <button id="speaker-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm font-medium">Start Test</button>
+                </div>
+            </div>
+
+            <!-- Display Test -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-5 flex flex-col">
+                 <div class="flex items-center mb-3">
+                     <svg class="icon text-yellow-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Z" /></svg>
+                    <h3 class="text-lg font-semibold">Display</h3>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 flex-grow">Reports screen resolution and color depth details.</p>
+                 <div id="display-result" class="mt-4 text-sm hidden"></div>
+                <div class="mt-4 flex items-center justify-between">
+                    <span id="display-status" class="status-badge status-pending">Pending</span>
+                    <button id="display-btn" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 text-sm font-medium">Run Check</button>
+                </div>
+            </div>
+
+            <!-- Network Test -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-5 flex flex-col">
+                 <div class="flex items-center mb-3">
+                    <svg class="icon text-cyan-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.045A5.25 5.25 0 0 1 7.5 15h9a5.25 5.25 0 0 1-.788.045m-8.424 0a5.25 5.25 0 0 0-1.06 4.095m10.548-4.095a5.25 5.25 0 0 1 1.06 4.095m-8.424 0-2.475 2.475A5.25 5.25 0 0 0 7.5 21h9a5.25 5.25 0 0 0 2.662-1.085L16.712 19.14M8.288 15.045l2.475-2.475a5.25 5.25 0 0 1 3.475 0L16.712 15.045m-8.424 0a5.25 5.25 0 0 0 3.475 0m0 0a5.25 5.25 0 0 1 3.475 0M12 3v1.5M12 21v-1.5m8.25-10.5H21M3 12h1.5m14.25-7.25-1.06-1.06M6.31 17.69l-1.06 1.06M17.69 6.31l1.06-1.06M6.31 6.31l-1.06 1.06" /></svg>
+                    <h3 class="text-lg font-semibold">Network</h3>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 flex-grow">Verifies internet connectivity by checking online status.</p>
+                 <div id="network-result" class="mt-4 text-sm hidden"></div>
+                <div class="mt-4 flex items-center justify-between">
+                    <span id="network-status" class="status-badge status-pending">Pending</span>
+                    <button id="network-btn" class="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 text-sm font-medium">Run Check</button>
+                </div>
+            </div>
+
+            <!-- System Info -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-5 flex flex-col">
+                 <div class="flex items-center mb-3">
+                     <svg class="icon text-blue-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 11.25h9.75M10.5 16.5h9.75M3.75 6H7.5m3 10.5h-3.375C6.47 16.5 6 16.03 6 15.5v-3.875C6 11.03 6.47 10.5 7.125 10.5H7.5" /></svg>
+                    <h3 class="text-lg font-semibold">System Info</h3>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 flex-grow">Provides basic browser and OS information.</p>
+                 <div id="system-result" class="mt-4 text-sm hidden break-all"></div>
+                <div class="mt-4 flex items-center justify-between">
+                    <span id="system-status" class="status-badge status-pending">Pending</span>
+                    <button id="system-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium">Run Check</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // --- UTILITY FUNCTIONS ---
+    const setStatus = (element, status, text) => {
+        element.className = `status-badge status-${status}`;
+        element.textContent = text;
+    };
+
+    // --- DOM ELEMENT SELECTORS ---
+    const cameraBtn = document.getElementById('camera-btn');
+    const cameraStatus = document.getElementById('camera-status');
+    const cameraResult = document.getElementById('camera-result');
+    const cameraFeed = document.getElementById('camera-feed');
+    
+    const micBtn = document.getElementById('mic-btn');
+    const micStatus = document.getElementById('mic-status');
+    const micResult = document.getElementById('mic-result');
+    const micLevel = document.getElementById('mic-level');
+
+    const speakerBtn = document.getElementById('speaker-btn');
+    const speakerStatus = document.getElementById('speaker-status');
+    const speakerResult = document.getElementById('speaker-result');
+    const speakerYesBtn = document.getElementById('speaker-yes');
+    const speakerNoBtn = document.getElementById('speaker-no');
+    
+    const displayBtn = document.getElementById('display-btn');
+    const displayStatus = document.getElementById('display-status');
+    const displayResult = document.getElementById('display-result');
+
+    const networkBtn = document.getElementById('network-btn');
+    const networkStatus = document.getElementById('network-status');
+    const networkResult = document.getElementById('network-result');
+
+    const systemBtn = document.getElementById('system-btn');
+    const systemStatus = document.getElementById('system-status');
+    const systemResult = document.getElementById('system-result');
+    
+    // --- TEST LOGIC ---
+
+    // 1. Camera Test
+    cameraBtn.addEventListener('click', async () => {
+        setStatus(cameraStatus, 'inprogress', 'Requesting...');
+        cameraBtn.disabled = true;
+        try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error('Media Devices API not supported.');
+            }
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            cameraFeed.srcObject = stream;
+            cameraResult.classList.remove('hidden');
+            setStatus(cameraStatus, 'success', 'Success');
+        } catch (err) {
+            console.error('Camera Error:', err);
+            cameraResult.classList.remove('hidden');
+            cameraResult.innerHTML = `<p class="text-red-500 text-center">Error: ${err.name}. Please check permissions.</p>`;
+            setStatus(cameraStatus, 'error', 'Failed');
+        } finally {
+            cameraBtn.disabled = false;
+        }
+    });
+
+    // 2. Microphone Test
+    let audioContext;
+    let analyser;
+    let micStream;
+    micBtn.addEventListener('click', async () => {
+        setStatus(micStatus, 'inprogress', 'Listening...');
+        micBtn.disabled = true;
+        micResult.classList.remove('hidden');
+        try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error('Media Devices API not supported.');
+            }
+            if(micStream) { // If stream already exists, stop it before getting a new one
+                micStream.getTracks().forEach(track => track.stop());
+            }
+            micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            const source = audioContext.createMediaStreamSource(micStream);
+            source.connect(analyser);
+            
+            analyser.fftSize = 256;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            const visualize = () => {
+                if (!micStream.active) return; // Stop if stream is closed
+                requestAnimationFrame(visualize);
+                analyser.getByteFrequencyData(dataArray);
+                let sum = dataArray.reduce((a, b) => a + b, 0);
+                let average = sum / bufferLength;
+                micLevel.style.width = `${Math.min(100, average * 1.5)}%`;
+            };
+            
+            visualize();
+            setStatus(micStatus, 'success', 'Active');
+
+        } catch (err) {
+            console.error('Microphone Error:', err);
+            micResult.innerHTML = `<p class="text-red-500 text-center">Error: ${err.name}. Please check permissions.</p>`;
+            setStatus(micStatus, 'error', 'Failed');
+        } finally {
+            micBtn.disabled = false;
+        }
+    });
+
+    // 3. Speaker Test
+    speakerBtn.addEventListener('click', () => {
+        setStatus(speakerStatus, 'inprogress', 'Playing...');
+        speakerBtn.disabled = true;
+        speakerResult.classList.remove('hidden');
+        
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.1);
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // A4 pitch
+            oscillator.start(audioCtx.currentTime);
+            
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1);
+            oscillator.stop(audioCtx.currentTime + 1);
+            
+        } catch (err) {
+            console.error('Speaker Error:', err);
+            speakerResult.innerHTML = `<p class="text-red-500 text-center">Error: Could not play audio.</p>`;
+            setStatus(speakerStatus, 'error', 'Failed');
+            speakerBtn.disabled = false;
+        }
+    });
+
+    speakerYesBtn.addEventListener('click', () => {
+        setStatus(speakerStatus, 'success', 'Success');
+        speakerResult.classList.add('hidden');
+        speakerBtn.disabled = false;
+    });
+
+    speakerNoBtn.addEventListener('click', () => {
+        setStatus(speakerStatus, 'error', 'Failed');
+        speakerResult.classList.add('hidden');
+        speakerBtn.disabled = false;
+    });
+    
+    // 4. Display Test
+    displayBtn.addEventListener('click', () => {
+        setStatus(displayStatus, 'inprogress', 'Checking...');
+        displayResult.classList.remove('hidden');
+        
+        const content = `
+            <ul>
+                <li class="flex justify-between"><span>Resolution:</span> <strong>${window.screen.width} x ${window.screen.height}</strong></li>
+                <li class="flex justify-between"><span>Available Res:</span> <strong>${window.screen.availWidth} x ${window.screen.availHeight}</strong></li>
+                <li class="flex justify-between"><span>Color Depth:</span> <strong>${window.screen.colorDepth}-bit</strong></li>
+                <li class="flex justify-between"><span>Pixel Depth:</span> <strong>${window.screen.pixelDepth}-bit</strong></li>
+            </ul>
+        `;
+        displayResult.innerHTML = content;
+        setStatus(displayStatus, 'success', 'Success');
+    });
+
+    // 5. Network Test
+    networkBtn.addEventListener('click', async () => {
+        setStatus(networkStatus, 'inprogress', 'Checking...');
+        networkResult.classList.remove('hidden');
+
+        if (navigator.onLine) {
+            // Further check by fetching a small resource
+            try {
+                // Use a reliable, CORS-enabled endpoint
+                await fetch('https://jsonplaceholder.typicode.com/posts/1', { mode: 'cors', cache: 'no-store' });
+                networkResult.textContent = 'Device is online and connected.';
+                setStatus(networkStatus, 'success', 'Online');
+            } catch (error) {
+                networkResult.textContent = 'Device is online but could not reach test server.';
+                setStatus(networkStatus, 'error', 'Unstable');
+            }
+        } else {
+            networkResult.textContent = 'Device is offline.';
+            setStatus(networkStatus, 'error', 'Offline');
+        }
+    });
+    
+    // 6. System Info Test
+    systemBtn.addEventListener('click', () => {
+        setStatus(systemStatus, 'inprogress', 'Checking...');
+        systemResult.classList.remove('hidden');
+        
+        const content = `
+            <ul>
+                <li class="mb-1"><strong>Browser:</strong> ${navigator.userAgentData?.brands.map(b => b.brand).join(', ') || 'N/A'}</li>
+                <li><strong>OS:</strong> ${navigator.userAgentData?.platform || 'N/A'}</li>
+                <li class="mt-2"><strong>User Agent:</strong> ${navigator.userAgent}</li>
+            </ul>
+        `;
+        systemResult.innerHTML = content;
+        setStatus(systemStatus, 'success', 'Success');
+    });
+</script>
+</body>
+</html>
